@@ -4,8 +4,8 @@ import websocket
 from websocket import create_connection
 from tqdm import tqdm  # Importer la bibliothèque tqdm
 
-stx = 0
-sty = 0
+stx = 0  # Coordonnée x de départ
+sty = 0  # Coordonnée y de départ
 
 
 # WebSocket connection using the accessToken

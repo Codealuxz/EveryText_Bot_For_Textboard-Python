@@ -2,11 +2,10 @@ import json
 import time
 import websocket
 from websocket import create_connection
-from tqdm import tqdm  # Importer la bibliothèque tqdm
+from tqdm import tqdm  # Import the tqdm library
 
-stx = 0  # Coordonnée x de départ
-sty = 0  # Coordonnée y de départ
-
+stx = 0  # Starting x coordinate
+sty = 0  # Starting y coordinate
 
 # WebSocket connection using the accessToken
 def on_open(ws):
@@ -26,95 +25,93 @@ heart-beat:10000,10000
         # Send the CONNECT message
         ws.send(connect_message)
         
-        # Après la connexion, envoyer l'ASCII art
-        ascii_art(ws, stx, sty)  # Coordonnées de départ
+        # After connection, send the ASCII art
+        ascii_art(ws, stx, sty)  # Starting coordinates
 
     else:
         print("Failed to retrieve the access token. Closing WebSocket connection.")
         ws.close()
 
 def on_message(ws, message):
-    # Pas d'affichage ici pour les messages reçus
+    # No display here for received messages
     pass
 
 def on_error(ws, error):
-    # Pas d'affichage d'erreurs
+    # No display for errors
     pass
 
 def on_close(ws, close_status_code, close_msg):
-    # Pas d'affichage de la fermeture
+    # No display for closure
     pass
 
-
-# Fonction pour envoyer l'ASCII art depuis un fichier texte avec une barre de progression persistante
+# Function to send ASCII art from a text file with a persistent progress bar
 def ascii_art(ws, start_x, start_y):
-    # Lire le fichier ASCII art
+    # Read the ASCII art file
     try:
         with open('ascii_art.txt', 'r', encoding='utf-8') as file:
             ascii_art = file.read()
     except FileNotFoundError:
-        print("Le fichier ascii_art.txt est introuvable.")
+        print("The file ascii_art.txt is not found.")
         return
     
-    # Calculer le nombre total de caractères à envoyer
+    # Calculate the total number of characters to send
     total_characters = sum(len(line) for line in ascii_art.splitlines())
     
-    # Débuter le chronométrage
+    # Start timing
     start_time = time.time()
     
-    # Créer une barre de progression avec tqdm
+    # Create a progress bar with tqdm
     with tqdm(total=total_characters, desc="Sending ASCII art", unit="char", dynamic_ncols=True, leave=False) as pbar:
-        # Envoyer chaque caractère un par un
+        # Send each character one by one
         for i, line in enumerate(ascii_art.splitlines()):
             for j, char in enumerate(line):
-                utf8_char = char.encode('utf-8')  # Convertir le caractère en UTF-8
+                utf8_char = char.encode('utf-8')  # Convert the character to UTF-8
 
-                # Envoyer chaque caractère à ses coordonnées
+                # Send each character to its coordinates
                 send_data(ws, start_x + j, start_y + i, utf8_char.decode('utf-8'))
-                time.sleep(0.03)  # Délai de 30 millisecondes
+                time.sleep(0.03)  # Delay of 30 milliseconds
                 
-                # Mettre à jour la barre de progression
+                # Update the progress bar
                 pbar.update(1)
     
-    # Fin du chronométrage
+    # End timing
     elapsed_time = time.time() - start_time
 
-    # Afficher le résumé à la fin
-    print("\nDessin terminé!")
-    print(f"URL du dessin : https://textboard.fr/?x={start_x}&y={start_y}")
-    print(f"Nombre de caractères envoyés : {total_characters}")
-    print(f"Temps total : {elapsed_time:.2f} secondes")
+    # Display the summary at the end
+    print("\nDrawing complete!")
+    print(f"Drawing URL: https://textboard.fr/?x={start_x}&y={start_y}")
+    print(f"Number of characters sent: {total_characters}")
+    print(f"Total time: {elapsed_time:.2f} seconds")
 
-
-# Fonction pour envoyer les données au serveur WebSocket
+# Function to send data to the WebSocket server
 def send_data(ws, x, y, value):
-    # S'assurer que la valeur est un seul caractère
+    # Ensure the value is a single character
     if len(value) != 1:
-        return  # Ne rien faire si la valeur n'est pas un seul caractère
+        return  # Do nothing if the value is not a single character
 
-    # Encoder les données en JSON
+    # Encode the data in JSON
     json_body = json.dumps({"x": x, "y": y, "value": value})
-    byte_length = len(json_body.encode())  # Longueur en octets du JSON
+    byte_length = len(json_body.encode())  # Byte length of the JSON
 
-    # Construire le message SEND
+    # Construct the SEND message
     send_message = f"""SEND
 destination:/app/map/set
 content-length:{byte_length}
 
 {json_body}\0"""
 
-    # Envoyer le message sans l'afficher dans le terminal
+    # Send the message without displaying it in the terminal
     ws.send(send_message)
 
-# URL du WebSocket
+# WebSocket URL
 ws_url = "wss://aywenito.textboard.fr:25555/ws"
 
-# Configurer la connexion WebSocket
+# Configure the WebSocket connection
 ws = websocket.WebSocketApp(ws_url, 
                             on_open=on_open,
                             on_message=on_message,
                             on_error=on_error,
                             on_close=on_close)
 
-# Lancer le client WebSocket
+# Launch the WebSocket client
 ws.run_forever()

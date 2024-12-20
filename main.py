@@ -4,6 +4,10 @@ import websocket
 from websocket import create_connection
 from tqdm import tqdm  # Importer la bibliothèque tqdm
 
+stx = 0
+sty = 0
+
+
 # WebSocket connection using the accessToken
 def on_open(ws):
     print('WebSocket connection established.')
@@ -23,7 +27,7 @@ heart-beat:10000,10000
         ws.send(connect_message)
         
         # Après la connexion, envoyer l'ASCII art
-        ascii_art(ws, 0, 0)  # Coordonnées de départ
+        ascii_art(ws, stx, sty)  # Coordonnées de départ
 
     else:
         print("Failed to retrieve the access token. Closing WebSocket connection.")

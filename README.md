@@ -13,13 +13,18 @@ pip install json websocket-client tqdm
 
 ---
 
-## 2. Setting Initial Coordinates
+## 2. Setting Initial Coordinates and token
 
 Before running the bot, you need to define the starting coordinates for your ASCII art. In the code, modify the following variables:
 
 ```python
 stx = 0  # Starting x coordinate
 sty = 0  # Starting y coordinate
+```
+
+And you have to put your token here : 
+```python
+auth_token = "YOUR AUTH_TOKEN HERE"
 ```
 
 ### Coordinate Illustration
